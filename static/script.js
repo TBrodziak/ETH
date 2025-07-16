@@ -10,8 +10,10 @@ class EthBotDashboard {
     }
     
     init() {
-        // Initialize Feather icons
-        feather.replace();
+        // Initialize Feather icons if available
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
         
         // Set up event listeners
         this.setupEventListeners();
@@ -103,15 +105,17 @@ class EthBotDashboard {
         const statusCard = statusElement.closest('.status-card');
         
         if (isRunning) {
-            statusElement.innerHTML = '<span class="status-badge online"><i data-feather="check-circle"></i> Running</span>';
+            statusElement.innerHTML = '<span class="status-badge online">✅ Running</span>';
             statusCard.classList.remove('pulse');
             statusCard.classList.add('pulse');
         } else {
-            statusElement.innerHTML = '<span class="status-badge offline"><i data-feather="x-circle"></i> Stopped</span>';
+            statusElement.innerHTML = '<span class="status-badge offline">❌ Stopped</span>';
             statusCard.classList.remove('pulse');
         }
         
-        feather.replace();
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
     }
     
     updatePriceDisplay(currentPrice) {
@@ -351,7 +355,9 @@ class EthBotDashboard {
         `;
         
         alertContainer.insertAdjacentHTML('afterbegin', alertHtml);
-        feather.replace();
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
         
         // Auto-dismiss after 5 seconds
         setTimeout(() => {

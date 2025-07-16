@@ -55,6 +55,11 @@ def start_bot_monitoring():
 @app.route('/')
 def index():
     """Main dashboard page"""
+    return render_template('simple.html')
+
+@app.route('/advanced')
+def advanced():
+    """Advanced dashboard page"""
     return render_template('index.html')
 
 @app.route('/api/status')
