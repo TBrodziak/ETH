@@ -25,7 +25,7 @@ def run_cli_mode():
     
     try:
         bot = EthereumBot()
-        bot.run_once())
+        bot.run_once()
     except KeyboardInterrupt:
         print("\n👋 Bot stopped by user")
     except Exception as e:
