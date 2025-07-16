@@ -159,6 +159,36 @@ def api_price_history():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route('/api/get-chat-updates')
+def api_get_chat_updates():
+    """Get recent chat updates to help find user chat ID"""
+    try:
+        bot_instance = create_bot_instance()
+        response = requests.get(f"{bot_instance.telegram_api_url}/getUpdates", timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("ok") and data.get("result"):
+                updates = []
+                for update in data["result"][-5:]:  # Last 5 updates
+                    if "message" in update:
+                        msg = update["message"]
+                        chat = msg["chat"]
+                        updates.append({
+                            "chat_id": chat["id"],
+                            "username": chat.get("username", ""),
+                            "first_name": chat.get("first_name", ""),
+                            "text": msg.get("text", ""),
+                            "date": msg["date"]
+                        })
+                return jsonify({"success": True, "updates": updates})
+            else:
+                return jsonify({"success": False, "message": "No updates found"})
+        else:
+            return jsonify({"success": False, "message": f"HTTP error: {response.status_code}"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
 if __name__ == '__main__':
     # Auto-start the bot
     try:

@@ -38,13 +38,26 @@ class EthereumBot:
                 "vs_currencies": "usd"
             }
             response = requests.get(self.config.coingecko_price_url, params=params, timeout=10)
+            
+            if response.status_code == 429:
+                print("Rate limited by CoinGecko, using cached price if available")
+                cached_price = self.store.get("last_price")
+                if cached_price:
+                    return cached_price
+                return None
+            
             response.raise_for_status()
             data = response.json()
-            return float(data["ethereum"]["usd"])
+            price = float(data["ethereum"]["usd"])
+            # Cache the successful price fetch
+            self.store.set("cached_price", price)
+            return price
         except Exception as e:
             print(f"Error fetching ETH price: {e}")
             self.store.set("last_error", f"Price fetch error: {e}")
-            return None
+            # Return cached price if available
+            cached_price = self.store.get("cached_price")
+            return cached_price
     
     def get_eth_24h_data(self) -> Optional[Tuple[float, float]]:
         """Get Ethereum price data for 24h change calculation"""
@@ -94,8 +107,13 @@ class EthereumBot:
     def send_telegram_message(self, message: str) -> bool:
         """Send message via Telegram"""
         try:
+            # Handle both username (@username) and user ID formats
+            chat_id = self.config.telegram_user_id
+            if not chat_id.startswith("@") and not chat_id.isdigit():
+                chat_id = f"@{chat_id}"
+            
             data = {
-                "chat_id": f"@{self.config.telegram_user_id}",
+                "chat_id": chat_id,
                 "text": message,
                 "parse_mode": "HTML",
                 "disable_web_page_preview": True
@@ -114,6 +132,15 @@ class EthereumBot:
                 else:
                     error_msg = result.get("description", "Unknown error")
                     print(f"Telegram API error: {error_msg}")
+                    
+                    # If chat not found, provide helpful instructions
+                    if "chat not found" in error_msg.lower():
+                        print(f"\n❌ Chat ID '{chat_id}' not found!")
+                        print("📱 To fix this:")
+                        print("1. Start a chat with your bot by sending /start to @my_very_cool_eth_bot")
+                        print("2. Or get your numeric chat ID by sending any message to the bot")
+                        print("3. Then update TELEGRAM_USER_ID in .env with your numeric ID")
+                    
                     self.store.set("last_error", f"Telegram API error: {error_msg}")
                     return False
             else:

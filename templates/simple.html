@@ -150,6 +150,7 @@
             <button id="stopBtn" class="btn btn-danger">⏹️ Stop Bot</button>
             <button id="testBtn" class="btn btn-info">📱 Test Telegram</button>
             <button id="manualBtn" class="btn btn-warning">🔄 Manual Check</button>
+            <button id="chatUpdatesBtn" class="btn btn-info">💬 Get Chat ID</button>
         </div>
 
         <div class="status-grid">
@@ -257,6 +258,7 @@
                 document.getElementById('stopBtn').addEventListener('click', () => this.stopBot());
                 document.getElementById('testBtn').addEventListener('click', () => this.testTelegram());
                 document.getElementById('manualBtn').addEventListener('click', () => this.manualCheck());
+                document.getElementById('chatUpdatesBtn').addEventListener('click', () => this.getChatUpdates());
             }
 
             startPeriodicUpdates() {
@@ -264,7 +266,7 @@
                     if (!this.isUpdating) {
                         this.updateDashboard();
                     }
-                }, 5000); // Update every 5 seconds
+                }, 15000); // Update every 15 seconds
             }
 
             async updateDashboard() {
@@ -391,6 +393,30 @@
 
             async manualCheck() {
                 await this.apiCall('/api/manual-check', 'POST', 'Running manual check...');
+            }
+
+            async getChatUpdates() {
+                try {
+                    this.showAlert('Getting chat updates...', 'info');
+                    const response = await fetch('/api/get-chat-updates');
+                    const data = await response.json();
+                    
+                    if (data.success && data.updates && data.updates.length > 0) {
+                        let message = 'Recent chats with your bot:\n\n';
+                        data.updates.forEach(update => {
+                            message += `Chat ID: ${update.chat_id}\n`;
+                            message += `Username: @${update.username || 'N/A'}\n`;
+                            message += `Name: ${update.first_name}\n`;
+                            message += `Message: "${update.text}"\n\n`;
+                        });
+                        message += 'Copy the Chat ID number and update your .env file with TELEGRAM_USER_ID=<Chat ID>';
+                        alert(message);
+                    } else {
+                        this.showAlert('No recent messages found. Send a message to @my_very_cool_eth_bot first!', 'warning');
+                    }
+                } catch (error) {
+                    this.showAlert('Error getting chat updates: ' + error.message, 'danger');
+                }
             }
 
             async apiCall(url, method, loadingMessage) {
