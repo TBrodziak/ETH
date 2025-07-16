@@ -7,5 +7,6 @@
   "total_alerts_sent": 0,
   "total_news_sent": 0,
   "last_error": "",
-  "cached_price": 3353.37
+  "cached_price": 3353.37,
+  "cached_ethereum_price": 3355.93
 }
