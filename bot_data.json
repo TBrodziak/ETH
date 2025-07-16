@@ -1,11 +1,11 @@
 {
-  "last_price": 3287.65,
+  "last_price": 3349.56,
   "last_24h_price": null,
   "last_news_timestamp": "",
   "last_daily_report": "",
   "bot_start_time": "2025-07-16T17:17:38.995772",
   "total_alerts_sent": 0,
   "total_news_sent": 0,
-  "last_error": "Telegram HTTP error: 400",
-  "cached_price": 3287.15
+  "last_error": "",
+  "cached_price": 3349.56
 }
