@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum Monitoring Bot Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="sidebar-sticky">
+                    <div class="sidebar-header">
+                        <h4><i data-feather="trending-up"></i> ETH Bot</h4>
+                        <p class="text-muted">Monitoring Dashboard</p>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard">
+                                <i data-feather="activity"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#price">
+                                <i data-feather="dollar-sign"></i> Price Monitor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#news">
+                                <i data-feather="newspaper"></i> News Feed
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings">
+                                <i data-feather="settings"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div class="main-header">
+                    <h1 class="h2">Ethereum Monitoring Bot</h1>
+                    <div class="btn-toolbar mb-3">
+                        <button id="startBtn" class="btn btn-success me-2">
+                            <i data-feather="play"></i> Start Bot
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger me-2">
+                            <i data-feather="stop"></i> Stop Bot
+                        </button>
+                        <button id="testBtn" class="btn btn-info me-2">
+                            <i data-feather="message-circle"></i> Test Telegram
+                        </button>
+                        <button id="manualCheckBtn" class="btn btn-warning">
+                            <i data-feather="refresh-cw"></i> Manual Check
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card status-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="status-icon bg-primary">
+                                        <i data-feather="activity"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="card-title mb-0">Bot Status</h6>
+                                        <h4 id="botStatus" class="text-muted">Loading...</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card status-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="status-icon bg-success">
+                                        <i data-feather="dollar-sign"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="card-title mb-0">ETH Price</h6>
+                                        <h4 id="currentPrice" class="text-success">$0.00</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card status-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="status-icon bg-warning">
+                                        <i data-feather="alert-triangle"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="card-title mb-0">Alerts Sent</h6>
+                                        <h4 id="alertCount" class="text-warning">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card status-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="status-icon bg-info">
+                                        <i data-feather="newspaper"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="card-title mb-0">News Sent</h6>
+                                        <h4 id="newsCount" class="text-info">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Chart Section -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="trending-up"></i> Price Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="price-info">
+                                            <label>Current Price</label>
+                                            <div id="priceDisplay" class="price-value">$0.00</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="price-info">
+                                            <label>24h Change</label>
+                                            <div id="priceChange" class="price-change">+0.00%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <canvas id="priceChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="settings"></i> Configuration</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="config-item">
+                                    <label>Price Threshold</label>
+                                    <span id="priceThreshold">3%</span>
+                                </div>
+                                <div class="config-item">
+                                    <label>Check Interval</label>
+                                    <span id="checkInterval">30s</span>
+                                </div>
+                                <div class="config-item">
+                                    <label>Daily Reports</label>
+                                    <span id="dailyReports">8, 12, 16, 20</span>
+                                </div>
+                                <div class="config-item">
+                                    <label>News Updates</label>
+                                    <span id="newsEnabled">Enabled</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="clock"></i> Scheduled Tasks</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="scheduledTasks">
+                                    <div class="text-muted">Loading tasks...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="alert-circle"></i> System Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="status-item">
+                                    <label>Last Update</label>
+                                    <span id="lastUpdate">Never</span>
+                                </div>
+                                <div class="status-item">
+                                    <label>Bot Start Time</label>
+                                    <span id="botStartTime">Not started</span>
+                                </div>
+                                <div class="status-item">
+                                    <label>Last Error</label>
+                                    <span id="lastError" class="text-danger">None</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div id="alertContainer"></div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
