@@ -375,3 +375,8 @@ class EthereumBot:
             except Exception as e:
                 print(f"❌ Critical error: {e}")
                 time.sleep(60)  # Wait longer on critical errors
+                
+    def run_once(self):
+        """Run single-cycle check for GitHub Actions"""
+        print("🚀 Running single-cycle ETH check (GitHub Actions)")
+        self.run_check_cycle()
