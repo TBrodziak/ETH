@@ -139,4 +139,14 @@ The bot is designed for personal use with configurable thresholds:
 - **Daily reports**: 4 times per day (8, 12, 16, 20 hours)
 - **News check interval**: 5 minutes
 
+## Recent Changes: Latest modifications with dates
+
+**July 16, 2025:**
+- Added LINK (Chainlink) cryptocurrency monitoring alongside ETH
+- Implemented daily price comparison feature at 8 AM
+- Both ETH and LINK now monitored for 3%+ price changes
+- Daily comparison shows today vs yesterday prices for both cryptocurrencies
+- Enhanced price monitoring to support multiple cryptocurrencies
+- Updated scheduler to include daily comparison task
+
 The modular design allows easy extension for additional cryptocurrencies or notification channels.

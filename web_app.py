@@ -51,6 +51,13 @@ def start_bot_monitoring():
         "News Updates"
     )
     
+    # Add daily comparison task (8 AM only)
+    scheduler.add_daily_task(
+        bot_instance.send_daily_comparison,
+        hour=config.daily_comparison_hour,
+        name="Daily Comparison"
+    )
+    
     scheduler.start()
 
 @app.route('/')
@@ -68,6 +75,7 @@ def api_status():
     """Get bot status"""
     bot_instance = create_bot_instance()
     current_price = bot_instance.get_eth_price()
+    link_price = bot_instance.get_link_price()
     
     status = {
         "bot_running": scheduler.running if scheduler else False,

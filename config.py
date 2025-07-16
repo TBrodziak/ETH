@@ -17,6 +17,8 @@ class Config:
         self.price_change_threshold = 3.0  # Percentage change threshold
         self.check_interval = 3600  # Seconds between price checks (60 minutes)
         self.daily_report_hours = [8, 12, 16, 20]  # Hours for daily reports
+        self.daily_comparison_hour = 8  # Hour for daily price comparison
+        self.cryptocurrencies = ["ethereum", "chainlink"]  # ETH and LINK
         
         # API endpoints
         self.coingecko_price_url = "https://api.coingecko.com/api/v3/simple/price"

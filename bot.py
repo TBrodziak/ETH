@@ -30,34 +30,43 @@ class EthereumBot:
             print(f"❌ Failed to initialize Telegram bot: {e}")
             raise
     
-    def get_eth_price(self) -> Optional[float]:
-        """Get current Ethereum price from CoinGecko"""
+    def get_crypto_price(self, crypto_id: str) -> Optional[float]:
+        """Get current cryptocurrency price from CoinGecko"""
         try:
+            cache_key = f"cached_{crypto_id}_price"
             params = {
-                "ids": "ethereum",
+                "ids": crypto_id,
                 "vs_currencies": "usd"
             }
             response = requests.get(self.config.coingecko_price_url, params=params, timeout=10)
             
             if response.status_code == 429:
-                print("Rate limited by CoinGecko, using cached price if available")
-                cached_price = self.store.get("last_price")
+                print(f"Rate limited by CoinGecko, using cached {crypto_id} price")
+                cached_price = self.store.get(cache_key)
                 if cached_price:
                     return cached_price
                 return None
             
             response.raise_for_status()
             data = response.json()
-            price = float(data["ethereum"]["usd"])
+            price = float(data[crypto_id]["usd"])
             # Cache the successful price fetch
-            self.store.set("cached_price", price)
+            self.store.set(cache_key, price)
             return price
         except Exception as e:
-            print(f"Error fetching ETH price: {e}")
+            print(f"Error fetching {crypto_id} price: {e}")
             self.store.set("last_error", f"Price fetch error: {e}")
             # Return cached price if available
-            cached_price = self.store.get("cached_price")
+            cached_price = self.store.get(f"cached_{crypto_id}_price")
             return cached_price
+
+    def get_eth_price(self) -> Optional[float]:
+        """Get current Ethereum price from CoinGecko"""
+        return self.get_crypto_price("ethereum")
+
+    def get_link_price(self) -> Optional[float]:
+        """Get current Chainlink price from CoinGecko"""
+        return self.get_crypto_price("chainlink")
     
     def get_eth_24h_data(self) -> Optional[Tuple[float, float]]:
         """Get Ethereum price data for 24h change calculation"""
@@ -155,11 +164,19 @@ class EthereumBot:
     
     def check_price_alerts(self):
         """Check for significant price changes and send alerts"""
-        current_price = self.get_eth_price()
+        # Check ETH price alerts
+        self._check_crypto_alert("ethereum", "ETH")
+        # Check LINK price alerts
+        self._check_crypto_alert("chainlink", "LINK")
+
+    def _check_crypto_alert(self, crypto_id: str, symbol: str):
+        """Check price alerts for a specific cryptocurrency"""
+        current_price = self.get_crypto_price(crypto_id)
         if current_price is None:
             return
         
-        last_price = self.store.get("last_price")
+        last_price_key = f"last_{crypto_id}_price"
+        last_price = self.store.get(last_price_key)
         
         if last_price is not None:
             price_change = current_price - last_price
@@ -168,7 +185,7 @@ class EthereumBot:
             if abs(price_change_percent) >= self.config.price_change_threshold:
                 direction = "📈" if price_change > 0 else "📉"
                 message = (
-                    f"{direction} <b>ETH Price Alert</b>\n\n"
+                    f"{direction} <b>{symbol} Price Alert</b>\n\n"
                     f"💰 Current Price: <b>${current_price:,.2f}</b>\n"
                     f"📊 Change: <b>{price_change_percent:+.2f}%</b> "
                     f"(${price_change:+.2f})\n"
@@ -177,11 +194,11 @@ class EthereumBot:
                 
                 if self.send_telegram_message(message):
                     self.store.increment("total_alerts_sent")
-                    print(f"🚨 Price alert sent: {price_change_percent:+.2f}%")
+                    print(f"🚨 {symbol} alert sent: {price_change_percent:+.2f}%")
         
         # Update stored price
-        self.store.set("last_price", current_price)
-        print(f"💰 Current ETH price: ${current_price:,.2f}")
+        self.store.set(last_price_key, current_price)
+        print(f"💰 Current {symbol} price: ${current_price:,.2f}")
     
     def send_daily_report(self):
         """Send daily price report"""
@@ -219,6 +236,54 @@ class EthereumBot:
             if self.send_telegram_message(message):
                 self.store.set("last_daily_report", f"{today_str}-{current_hour}")
                 print(f"📊 Daily report sent for {current_hour}:00")
+
+    def send_daily_comparison(self):
+        """Send daily price comparison at 8 AM"""
+        current_hour = datetime.now().hour
+        last_comparison_date = self.store.get("last_daily_comparison", "")
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        
+        # Only send at 8 AM and once per day
+        if (current_hour == self.config.daily_comparison_hour and 
+            last_comparison_date != today_str):
+            
+            message_parts = ["🌅 <b>Daily Price Comparison</b>\n"]
+            
+            # Get prices for both cryptocurrencies
+            for crypto_id, symbol in [("ethereum", "ETH"), ("chainlink", "LINK")]:
+                current_price = self.get_crypto_price(crypto_id)
+                yesterday_price = self.store.get(f"yesterday_{crypto_id}_price")
+                
+                if current_price and yesterday_price:
+                    change = current_price - yesterday_price
+                    change_percent = (change / yesterday_price) * 100
+                    direction = "📈" if change > 0 else "📉"
+                    
+                    message_parts.append(
+                        f"\n💰 <b>{symbol}</b>\n"
+                        f"Today: ${current_price:,.2f}\n"
+                        f"Yesterday: ${yesterday_price:,.2f}\n"
+                        f"Change: <b>{change_percent:+.2f}%</b> (${change:+.2f}) {direction}"
+                    )
+                elif current_price:
+                    message_parts.append(
+                        f"\n💰 <b>{symbol}</b>\n"
+                        f"Current: ${current_price:,.2f}\n"
+                        f"Yesterday: No data available"
+                    )
+            
+            message_parts.append(f"\n⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            message = "\n".join(message_parts)
+            
+            if self.send_telegram_message(message):
+                self.store.set("last_daily_comparison", today_str)
+                print("📊 Daily comparison sent at 8:00 AM")
+                
+            # Store today's prices as yesterday's for tomorrow's comparison
+            for crypto_id in ["ethereum", "chainlink"]:
+                current_price = self.get_crypto_price(crypto_id)
+                if current_price:
+                    self.store.set(f"yesterday_{crypto_id}_price", current_price)
     
     def check_news_updates(self):
         """Check for new crypto news and send updates"""
