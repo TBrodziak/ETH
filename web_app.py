@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import threading
 import time
+import requests
 from datetime import datetime
 from bot import EthereumBot
 from scheduler import TaskScheduler
@@ -164,6 +165,7 @@ def api_get_chat_updates():
     """Get recent chat updates to help find user chat ID"""
     try:
         bot_instance = create_bot_instance()
+
         response = requests.get(f"{bot_instance.telegram_api_url}/getUpdates", timeout=10)
         
         if response.status_code == 200:

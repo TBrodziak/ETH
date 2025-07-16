@@ -15,7 +15,7 @@ class Config:
         
         # Bot configuration
         self.price_change_threshold = 3.0  # Percentage change threshold
-        self.check_interval = 60  # Seconds between price checks (reduced to avoid rate limits)
+        self.check_interval = 3600  # Seconds between price checks (60 minutes)
         self.daily_report_hours = [8, 12, 16, 20]  # Hours for daily reports
         
         # API endpoints

@@ -1,10 +1,11 @@
 {
-  "last_price": 3289.98,
+  "last_price": 3287.65,
   "last_24h_price": null,
   "last_news_timestamp": "",
   "last_daily_report": "",
   "bot_start_time": "2025-07-16T17:17:38.995772",
   "total_alerts_sent": 0,
   "total_news_sent": 0,
-  "last_error": "Price fetch error: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+  "last_error": "Telegram HTTP error: 400",
+  "cached_price": 3287.15
 }

@@ -65,7 +65,7 @@ Examples:
     python main.py --cli        # Run in command-line mode only
     
 The bot will:
-    • Monitor ETH price every 30 seconds
+    • Monitor ETH price every 60 minutes
     • Send alerts for 3%+ price changes
     • Send daily reports at 8AM, 12PM, 4PM, 8PM
     • Send important crypto news updates (if API key configured)
